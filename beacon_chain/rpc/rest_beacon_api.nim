@@ -710,12 +710,12 @@ proc installBeaconApiHandlers*(router: var RestRouter, node: BeaconNode) =
                                            $dres.error())
         dres.get()
 
-    var failures: seq[RestAttestationsFailure]
+    var failures: seq[RestFailureItem]
     for atindex, attestation in attestations.pairs():
       debug "Attestation for pool", attestation = attestation, signature = $attestation.signature
       if not await node.sendAttestation(attestation):
-        failures.add(RestAttestationsFailure(
-          index: uint64(atindex), message: "Attestation failed validation"))
+        failures.add(RestFailureItem(index: uint64(atindex),
+                                     message: "Attestation failed validation"))
 
     if len(failures) > 0:
       return RestApiResponse.jsonErrorList(Http400, AttestationValidationError,
