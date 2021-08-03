@@ -126,7 +126,7 @@ type
     slot*: Slot
     validators*: seq[ValidatorIndex]
 
-  RestAttestationsFailure* = object
+  RestFailureItem* = object
     index*: uint64
     message*: string
 
