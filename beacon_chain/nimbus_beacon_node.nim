@@ -1469,13 +1469,13 @@ proc handleValidatorExitCommand(config: BeaconNodeConf) {.async.} =
          "key '" & validatorKeyAsStr & "'."
     quit 1
 
-  let signingKey = loadKeystore(
+  let signingItem = loadKeystore(
     validatorsDir,
     config.secretsDir,
     validatorKeyAsStr,
     config.nonInteractive)
 
-  if signingKey.isNone:
+  if signingItem.isNone:
     fatal "Unable to continue without decrypted signing key"
     quit 1
 
@@ -1497,8 +1497,11 @@ proc handleValidatorExitCommand(config: BeaconNodeConf) {.async.} =
       epoch: exitAtEpoch,
       validator_index: validatorIdx))
 
-  signedExit.signature = get_voluntary_exit_signature(
-    fork, genesisValidatorsRoot, signedExit.message, signingKey.get).toValidatorSig()
+  signedExit.signature =
+    block:
+      let key = signingItem.get().privateKey
+      get_voluntary_exit_signature(fork, genesisValidatorsRoot,
+                                   signedExit.message, key).toValidatorSig()
 
   template ask(prompt: string): string =
     try:
